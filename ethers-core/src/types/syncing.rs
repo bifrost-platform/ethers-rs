@@ -10,6 +10,8 @@ pub enum SyncingStatus {
     IsFalse,
     /// When client is still syncing past blocks we get IsSyncing information.
     IsSyncing(Box<SyncProgress>),
+    /// When client is still syncing past blocks we get IsSyncing information (Arbitrum).
+    IsArbitrumSyncing(Box<ArbitrumSyncProgress>),
 }
 
 impl Serialize for SyncingStatus {
@@ -20,6 +22,7 @@ impl Serialize for SyncingStatus {
         match self {
             SyncingStatus::IsFalse => serializer.serialize_bool(false),
             SyncingStatus::IsSyncing(sync) => sync.serialize(serializer),
+            SyncingStatus::IsArbitrumSyncing(sync) => sync.serialize(serializer),
         }
     }
 }
@@ -36,6 +39,8 @@ impl<'de> Deserialize<'de> for SyncingStatus {
             IsFalse(bool),
             /// When client is still syncing past blocks we get IsSyncing information.
             IsSyncing(Box<SyncProgress>),
+            /// When client is still syncing past blocks we get IsSyncing information (Arbitrum).
+            IsArbitrumSyncing(Box<ArbitrumSyncProgress>),
         }
 
         match SyncingStatusIntermediate::deserialize(deserializer)? {
@@ -44,6 +49,9 @@ impl<'de> Deserialize<'de> for SyncingStatus {
                 "eth_syncing returned `true` that is undefined value.",
             )),
             SyncingStatusIntermediate::IsSyncing(sync) => Ok(SyncingStatus::IsSyncing(sync)),
+            SyncingStatusIntermediate::IsArbitrumSyncing(sync) => {
+                Ok(SyncingStatus::IsArbitrumSyncing(sync))
+            }
         }
     }
 }
@@ -96,6 +104,20 @@ pub struct SyncProgress {
     pub synced_storage: Option<U64>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub synced_storage_bytes: Option<U64>,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ArbitrumSyncProgress {
+    pub batch_seen: U64,
+    pub batch_processed: U64,
+    pub message_of_processed_batch: U64,
+    pub msg_count: U64,
+    pub block_num: U64,
+    pub message_of_last_block: U64,
+    pub broadcaster_queued_messages_pos: U64,
+    pub last_l1_block_num: U64,
+    pub lastl1_block_hash: crate::types::H256,
 }
 
 #[cfg(test)]
