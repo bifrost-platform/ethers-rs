@@ -151,6 +151,7 @@ mod tests {
                 panic!("unexpected variant")
             }
             SyncingStatus::IsSyncing(_) => {}
+            SyncingStatus::IsArbitrumSyncing(_) => {}
         }
     }
 
@@ -168,6 +169,7 @@ mod tests {
                 panic!("unexpected variant")
             }
             SyncingStatus::IsSyncing(_) => {}
+            SyncingStatus::IsArbitrumSyncing(_) => {}
         }
     }
 
@@ -179,6 +181,9 @@ mod tests {
         match sync {
             SyncingStatus::IsFalse => {}
             SyncingStatus::IsSyncing(_) => {
+                panic!("unexpected variant")
+            }
+            SyncingStatus::IsArbitrumSyncing(_) => {
                 panic!("unexpected variant")
             }
         }
