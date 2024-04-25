@@ -1,6 +1,6 @@
 //! Types for `eth_syncing` RPC call
 
-use crate::types::U64;
+use crate::types::{H256, U64};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 /// Structure used in `eth_syncing` RPC
@@ -109,15 +109,15 @@ pub struct SyncProgress {
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ArbitrumSyncProgress {
-    pub batch_seen: U64,
-    pub batch_processed: U64,
-    pub message_of_processed_batch: U64,
-    pub msg_count: U64,
-    pub block_num: U64,
-    pub message_of_last_block: U64,
-    pub broadcaster_queued_messages_pos: U64,
-    pub last_l1_block_num: U64,
-    pub lastl1_block_hash: crate::types::H256,
+    pub batch_seen: u64,
+    pub batch_processed: u64,
+    pub message_of_processed_batch: u64,
+    pub msg_count: u64,
+    pub block_num: u64,
+    pub message_of_last_block: u64,
+    pub broadcaster_queued_messages_pos: u64,
+    pub last_l1_block_num: u64,
+    pub lastl1_block_hash: H256,
 }
 
 #[cfg(test)]
@@ -162,6 +162,30 @@ mod tests {
         "highestBlock": "0xeaa329",
         "startingBlock": "0xea97ee"
     }"#;
+
+        let sync: SyncingStatus = serde_json::from_str(s).unwrap();
+        match sync {
+            SyncingStatus::IsFalse => {
+                panic!("unexpected variant")
+            }
+            SyncingStatus::IsSyncing(_) => {}
+            SyncingStatus::IsArbitrumSyncing(_) => {}
+        }
+    }
+
+    #[test]
+    fn deserialize_sync_arbitrum() {
+        let s = r#"{
+            "batchProcessed":592714,
+            "batchSeen":592716,
+            "blockNum":204567679,
+            "broadcasterQueuedMessagesPos":0,
+            "lastL1BlockNum":19730155,
+            "lastl1BlockHash":"0x65424402d9a2148709dd7aba403eef67fe5a0cdec9748a1cea62bdc8b9b26e0f",
+            "messageOfLastBlock":182359863,
+            "messageOfProcessedBatch":182357174,
+            "msgCount":182359863
+        }"#;
 
         let sync: SyncingStatus = serde_json::from_str(s).unwrap();
         match sync {
